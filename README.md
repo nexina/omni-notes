@@ -1,16 +1,18 @@
-# omni_notes
+# Omni Notes - A Project of Omni Project
+## Simple - Minimalist - Versatile
 
-A new Flutter project.
+<img src="https://github.com/nexina/omni-notes/blob/master/images/preview.png">
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Omni Notes - First app of the Omni Project"
+The goal for this app was to make the most simples, minimalist (not boring) and versatile notes app in the world.
+#Features
+- Can do basic stuff like any notepad app
+- Sync to  any devices automatically
+- has reminder and todolist functionality
+- Can change the background image
+- Search function to find any note, todolist, reminder easily 
+Link: https://github.com/.../omni-notes/releases/tag/Pre-Release
+Language : Dart
+Framework : Flutter
+Platform: Currently (Android, Windows)
+Time: 1 week
