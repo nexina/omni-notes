@@ -1,150 +1,51 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:omni_notes/resources.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class ToDoList extends StatefulWidget {
-  const ToDoList({Key? key}) : super(key: key);
+class ToDoListView extends StatefulWidget {
+  final TextEditingController searchController;
+  final ScrollController scrollController;
+  final Function(String) searchList;
+  final Function(int) deleteTask;
+  final Function(String, int) changeCheckBoxValue;
+  final Function(String, int) changeTaskName;
+  final FocusNode checkSearch;
+  final List taskList;
+  final List dummyList;
+  const ToDoListView({
+    super.key,
+    required this.searchController,
+    required this.scrollController,
+    required this.searchList,
+    required this.checkSearch,
+    required this.taskList,
+    required this.dummyList,
+    required this.deleteTask,
+    required this.changeCheckBoxValue,
+    required this.changeTaskName,
+  });
 
   @override
-  State<ToDoList> createState() => ToDoListState();
+  State<ToDoListView> createState() => ToDoListViewState();
 }
 
-// List toDoList = [
-//   ["Make Tutorial", false],
-//   ["Do Stuff", false],
-//   ["Do FUck", false],
-// ];
-
-List taskList = [];
-List dummyList = [];
-
-class ToDoListState extends State<ToDoList> {
-  // FUNCTIONS
-  // Change Checkbox Value
-  @override
-  void initState() {
-    super.initState();
-    //resetPreferences();
-    loadToDoList().then((_) {
-      dummyList = taskList;
-      setState(() {});
-    });
-
-    checkSearch.addListener(() {
-      if (!checkSearch.hasFocus) {
-        resetList();
-        searchController.text = '';
-      }
-    });
-  }
-
-  void resetList() {
-    setState(() {
-      dummyList = taskList;
-    });
-  }
-
-  void searchList(String searchText) {
-    setState(() {
-      dummyList = taskList
-          .where((element) =>
-              element[0].toLowerCase().contains(searchText.toLowerCase()))
-          .toList();
-    });
-
-    setState(() {});
-  }
-
-  void changeCheckBoxValue(String value, int index) {
-    setState(() {
-      if (taskList[index][1] == "0") {
-        taskList[index][1] = "1";
-      } else {
-        taskList[index][1] = "0";
-      }
-      if (value == "1") {
-        var item = taskList[index];
-        taskList.removeAt(index);
-        taskList.add(item);
-      }
-
-      saveToDoList();
-    });
-  }
-
-  // Change Task Name
-  void changeTaskName(String value, int index) {
-    setState(() {
-      taskList[index][0] = value;
-      saveToDoList();
-    });
-  }
-
-  // Delete Task
-  void deleteTask(int index) {
-    setState(() {
-      taskList.removeAt(index);
-      saveToDoList();
-    });
-  }
-
-  void addNewTask() {
-    setState(() {
-      List<String> newTask = ["", "0"];
-      taskList.add(newTask);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: Duration(seconds: 1),
-          curve: Curves.easeInOut,
-        );
-      });
-      saveToDoList();
-    });
-  }
-
-  Future<void> loadToDoList() async {
-    final prefs = await SharedPreferences.getInstance();
-    final loadedList = prefs.getString(Resources.KEY_TODOLIST);
-    if (loadedList != null) {
-      taskList = List<List<String>>.from(
-          jsonDecode(loadedList).map((x) => List<String>.from(x)));
-    }
-  }
-
-  Future<void> saveToDoList() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(Resources.KEY_TODOLIST, jsonEncode(taskList));
-  }
-
-  Future<void> resetPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-  }
-
-  TextEditingController searchController = TextEditingController();
-  final ScrollController scrollController = ScrollController();
-  FocusNode checkSearch = FocusNode();
-
+class ToDoListViewState extends State<ToDoListView> {
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         TextField(
-          // SEARCH Text Field
-          controller: searchController,
+          controller: widget.searchController,
           onChanged: (value) {
             setState(() {
-              searchList(value);
+              widget.searchList(value);
             });
           },
-          focusNode: checkSearch,
+          focusNode: widget.checkSearch,
           textAlign: TextAlign.center,
           decoration: InputDecoration(
             hintText: "SEARCH",
             hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.6), letterSpacing: 5),
+                color: Colors.white.withValues(alpha: 0.6), letterSpacing: 5),
             border: InputBorder.none,
             disabledBorder: InputBorder.none,
           ),
@@ -157,25 +58,24 @@ class ToDoListState extends State<ToDoList> {
           cursorColor: const Color.fromARGB(255, 201, 201, 201),
         ),
         Expanded(
-          child: (taskList.isEmpty)
+          child: (widget.taskList.isEmpty)
               ? Center(
                   child: Text("Nothing To Do",
                       style: TextStyle(
                         color: Resources.tertiaryTextColor,
-                        //Color.fromARGB(255, 168, 168, 168),
                         fontSize: 15,
                         fontFamily: "Inria Sans",
                       )),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(0),
-                  controller: scrollController,
+                  controller: widget.scrollController,
                   physics: const ScrollPhysics(parent: BouncingScrollPhysics()),
-                  itemCount: dummyList.length,
+                  itemCount: widget.dummyList.length,
                   itemBuilder: (context, index) {
                     return ToDoListItem(
-                      taskName: dummyList[index][0],
-                      taskCompleted: dummyList[index][1],
+                      taskName: widget.dummyList[index][0],
+                      taskCompleted: widget.dummyList[index][1],
                       onChanged: (value) {
                         String valStr;
                         if (value == true) {
@@ -185,14 +85,13 @@ class ToDoListState extends State<ToDoList> {
                         }
 
                         setState(() {
-                          changeCheckBoxValue(valStr, index);
+                          widget.changeCheckBoxValue(valStr, index);
                         });
                       },
-                      onDelete: () => deleteTask(index),
+                      onDelete: () => widget.deleteTask(index),
                       updateTask: (taskName) {
-                        changeTaskName(taskName, index);
+                        widget.changeTaskName(taskName, index);
                       },
-                      //onEdit: () => changeTaskName(value, index),
                     );
                   },
                 ),
@@ -215,7 +114,6 @@ class ToDoListItem extends StatefulWidget {
       required this.taskCompleted,
       required this.onChanged,
       required this.updateTask,
-      //required this.onEdit,
       required this.onDelete});
 
   @override
@@ -243,7 +141,6 @@ class _ToDoListItemState extends State<ToDoListItem> {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      //height: 50,
       margin: const EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),

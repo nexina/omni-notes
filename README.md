@@ -7,7 +7,7 @@ Omni Notes - First app of the Omni Project"
 The goal for this app was to make the most simples, minimalist (not boring) and versatile notes app in the world.
 
 # Features
-- Can do basic stuff like any notepad app
+- Can do ****basic stuff like any notepad app
 - Sync to  any devices automatically
 - has reminder and todolist functionality
 - Can change the background image

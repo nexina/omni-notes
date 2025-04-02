@@ -1,69 +1,62 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:omni_notes/notes.dart';
-import 'package:omni_notes/quill.dart';
-import 'package:omni_notes/reminder.dart';
 import 'package:omni_notes/resources.dart';
-import 'package:omni_notes/settings.dart';
-import 'package:omni_notes/todolist.dart';
 
-class DesktopMain extends StatefulWidget {
-  const DesktopMain({super.key});
+import 'package:omni_notes/view_controller/settings_vc.dart';
+import 'package:omni_notes/view_controller/notes_vc.dart';
+import 'package:omni_notes/view_controller/todolist_vc.dart';
+import 'package:omni_notes/view_controller/reminder_vc.dart';
+
+/*
+DesktopMainWindowView: DesktopMainWindowView is the main view for the Android version of the app. it's stateful because the background is changeable.
+It contains a TabBar with three tabs: Notes, ToDoList, and Reminder.
+Each tab has a corresponding view: NotesList, ToDoList, and ReminderList.
+The view also contains a button to create a new note, to-do list, or reminder.
+The view is styled with a background image and a blur effect.
+
+TabController tabController: The TabController for the TabBar.
+createNTR: A function that creates a new note, to-do list, or reminder.
+changeIndex: changes  the index of working tab.
+GlobalKey<ToDoListState> todolistKey: A GlobalKey for the ToDoListState. Used to access the ToDoListState from the parent widget.
+GlobalKey<NotesListState> noteKey: A GlobalKey for the NotesListState. Used to access the NotesListState from the parent widget.
+GlobalKey<ReminderListState> reminderKey: A GlobalKey for the ReminderListState. Used to access the ReminderListState from the parent widget.
+*/
+
+class DesktopMainWindowView extends StatefulWidget {
+  final TabController tabController;
+  final Function createNTR;
+  final Function changeIndex;
+  final GlobalKey<ToDoListViewControllerState> todolistKey;
+  final GlobalKey<NotesListViewControllerState> noteKey;
+  final GlobalKey<ReminderListViewControllerState> reminderKey;
+  const DesktopMainWindowView(
+      {super.key,
+      required this.changeIndex,
+      required this.createNTR,
+      required this.tabController,
+      required this.todolistKey,
+      required this.noteKey,
+      required this.reminderKey});
 
   @override
-  State<DesktopMain> createState() => _DesktopMainState();
+  State<DesktopMainWindowView> createState() => _DesktopMainWindowViewState();
 }
 
-class _DesktopMainState extends State<DesktopMain> {
-  final GlobalKey<ToDoListState> todolistKey = GlobalKey();
-  final GlobalKey<NotesListState> noteKey = GlobalKey();
-  final GlobalKey<ReminderListState> reminderKey = GlobalKey();
-
-  void create(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Quill(
-                onNoteAdded: (title, content, time) {
-                  noteKey.currentState?.addNote(title, content, time);
-                },
-              ),
-            ),
-          );
-        }
-        break;
-      case 1:
-        {
-          //createNewTask(context);
-          todolistKey.currentState?.addNewTask();
-        }
-        break;
-      case 2:
-        {
-          // Show AddReminderDialog
-          reminderKey.currentState?.addReminder();
-        }
-        break;
-    }
-  }
-
+class _DesktopMainWindowViewState extends State<DesktopMainWindowView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
             image: DecorationImage(
-          image: Resources().getImageProvider(Resources.BackgroundImage),
+          image: Resources().getImageProvider(Resources.backgroundImage),
           fit: BoxFit.cover,
         )),
         child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
             child: Container(
-              color: const Color(0x00242424).withOpacity(0.5),
+              color: const Color(0x00242424).withValues(alpha: .5),
               child: Column(
                 children: [
                   Expanded(
@@ -85,7 +78,9 @@ class _DesktopMainState extends State<DesktopMain> {
                             ),
                             child: Column(
                               children: [
-                                Expanded(child: NotesList(key: noteKey)),
+                                Expanded(
+                                    child: NotesListViewController(
+                                        key: widget.noteKey)),
                                 SizedBox(
                                   height: 60,
                                   child: Row(children: [
@@ -105,7 +100,6 @@ class _DesktopMainState extends State<DesktopMain> {
                                             padding: const EdgeInsets.only(
                                                 left: 10.0),
                                             child: Text("Notes",
-                                                //textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   color: Resources
@@ -120,7 +114,8 @@ class _DesktopMainState extends State<DesktopMain> {
                                       width: 60,
                                       child: IconButton(
                                           onPressed: () {
-                                            create(context, 0);
+                                            widget.changeIndex(0);
+                                            widget.createNTR(context);
                                           },
                                           icon: Icon(
                                             Icons.add,
@@ -136,18 +131,15 @@ class _DesktopMainState extends State<DesktopMain> {
                         ),
                         Expanded(
                           child: Container(
-                            //width: (MediaQuery.of(context).size.width / 2) - 60,
                             margin: const EdgeInsets.only(
                                 top: 20.0,
                                 left: 10.0,
                                 right: 20.0,
                                 bottom: 10.0),
-
                             child: Column(
                               children: [
                                 Expanded(
                                   child: Container(
-                                    //width: (MediaQuery.of(context).size.width / 2) - 60,
                                     margin: const EdgeInsets.only(
                                         top: 0.0,
                                         left: 0.0,
@@ -163,7 +155,8 @@ class _DesktopMainState extends State<DesktopMain> {
                                     child: Column(
                                       children: [
                                         Expanded(
-                                            child: ToDoList(key: todolistKey)),
+                                            child: ToDoListViewController(
+                                                key: widget.todolistKey)),
                                         SizedBox(
                                           height: 60,
                                           child: Row(children: [
@@ -185,7 +178,6 @@ class _DesktopMainState extends State<DesktopMain> {
                                                         const EdgeInsets.only(
                                                             left: 10.0),
                                                     child: Text("To Do List",
-                                                        //textAlign: TextAlign.center,
                                                         style: TextStyle(
                                                           fontSize: 12,
                                                           color: Resources
@@ -201,7 +193,8 @@ class _DesktopMainState extends State<DesktopMain> {
                                               width: 60,
                                               child: IconButton(
                                                   onPressed: () {
-                                                    create(context, 1);
+                                                    widget.changeIndex(1);
+                                                    widget.createNTR(context);
                                                   },
                                                   icon: Icon(
                                                     Icons.add,
@@ -218,7 +211,6 @@ class _DesktopMainState extends State<DesktopMain> {
                                 ),
                                 Expanded(
                                   child: Container(
-                                    //width: (MediaQuery.of(context).size.width / 2) - 60,
                                     margin: const EdgeInsets.only(
                                         top: 10.0,
                                         left: 0.0,
@@ -234,8 +226,8 @@ class _DesktopMainState extends State<DesktopMain> {
                                     child: Column(
                                       children: [
                                         Expanded(
-                                            child:
-                                                ReminderList(key: reminderKey)),
+                                            child: ReminderListViewController(
+                                                key: widget.reminderKey)),
                                         SizedBox(
                                           height: 60,
                                           child: Row(children: [
@@ -273,7 +265,8 @@ class _DesktopMainState extends State<DesktopMain> {
                                               width: 60,
                                               child: IconButton(
                                                   onPressed: () {
-                                                    create(context, 2);
+                                                    widget.changeIndex(2);
+                                                    widget.createNTR(context);
                                                   },
                                                   icon: Icon(
                                                     Icons.add,
@@ -303,7 +296,8 @@ class _DesktopMainState extends State<DesktopMain> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const Settings(),
+                              builder: (context) =>
+                                  const SettingsViewController(),
                             ),
                           );
                         },

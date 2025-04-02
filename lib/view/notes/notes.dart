@@ -1,132 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:omni_notes/quill.dart';
+import 'package:omni_notes/view_controller/quill_vc.dart';
 import 'package:omni_notes/resources.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
-class NotesList extends StatefulWidget {
-  const NotesList({super.key});
+class NotesListView extends StatefulWidget {
+  final TextEditingController searchController;
+  final ScrollController scrollController;
+  final Function(String) searchList;
+  final Function(String, String, String, int) updateNote;
+  final FocusNode checkSearch;
+  final List dummyList;
+  final Function deleteNote;
+  final Function addNote;
+  const NotesListView({
+    super.key,
+    required this.searchController,
+    required this.scrollController,
+    required this.searchList,
+    required this.updateNote,
+    required this.checkSearch,
+    required this.dummyList,
+    required this.deleteNote,
+    required this.addNote,
+  });
 
   @override
-  State<NotesList> createState() => NotesListState();
+  State<NotesListView> createState() => NotesListViewState();
 }
 
-// List noteList = [
-//   ["New FORk", "CUntent", "12 December 2021, 12:00 AM"],
-//   ["New", "bal", "30 September 2021, 10:31 AM"],
-// ];
-
-List noteList = [];
-List dummyList = [];
-
-class NotesListState extends State<NotesList> {
-  @override
-  void initState() {
-    super.initState();
-    loadNoteList().then((_) {
-      dummyList = noteList;
-      setState(() {});
-    });
-
-    checkSearch.addListener(() {
-      if (!checkSearch.hasFocus) {
-        resetList();
-        searchController.text = '';
-      }
-    });
-
-    // resetPreferences();
-  }
-
-  void resetList() {
-    setState(() {
-      dummyList = noteList;
-    });
-  }
-
-  void searchList(String searchText) {
-    setState(() {
-      dummyList = noteList
-          .where((element) =>
-              element[0].toLowerCase().contains(searchText.toLowerCase()))
-          .toList();
-    });
-
-    setState(() {});
-  }
-
-  Future<void> loadNoteList() async {
-    final prefs = await SharedPreferences.getInstance();
-    final loadedList = prefs.getString(Resources.KEY_NOTESLIST);
-    if (loadedList != null) {
-      noteList = List<List<String>>.from(
-          jsonDecode(loadedList).map((x) => List<String>.from(x)));
-    }
-  }
-
-  Future<void> saveNoteList() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(Resources.KEY_NOTESLIST, jsonEncode(noteList));
-  }
-
-  Future<void> resetPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-  }
-
-  void addNote(String title, String content, String date) {
-    setState(() {
-      noteList.add([title, content, date]);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: const Duration(seconds: 1),
-          curve: Curves.easeInOut,
-        );
-      });
-      saveNoteList();
-    });
-  }
-
-  void deleteNote(int index) {
-    setState(() {
-      noteList.removeAt(index);
-      saveNoteList();
-    });
-  }
-
-  void updateNote(String title, String content, String date, int index) {
-    setState(() {
-      noteList[index][0] = title;
-      noteList[index][1] = content;
-      noteList[index][2] = date;
-      saveNoteList();
-    });
-  }
-
-  TextEditingController searchController = TextEditingController();
-  final ScrollController scrollController = ScrollController();
-  FocusNode checkSearch = FocusNode();
+class NotesListViewState extends State<NotesListView> {
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         TextField(
-          // SEARCH Text Field
-          controller: searchController,
+          controller: widget.searchController,
           onChanged: (value) {
             setState(() {
-              searchList(value);
+              widget.searchList(value);
             });
           },
-
-          focusNode: checkSearch,
+          focusNode: widget.checkSearch,
           textAlign: TextAlign.center,
           decoration: InputDecoration(
             hintText: "SEARCH",
             hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.6), letterSpacing: 5),
+                color: Colors.white.withValues(alpha: .6), letterSpacing: 5),
             border: InputBorder.none,
             disabledBorder: InputBorder.none,
           ),
@@ -139,7 +58,7 @@ class NotesListState extends State<NotesList> {
           cursorColor: const Color.fromARGB(255, 201, 201, 201),
         ),
         Expanded(
-          child: (dummyList.isEmpty)
+          child: (widget.dummyList.isEmpty)
               ? IntrinsicHeight(
                   child: Center(
                     child: Text(
@@ -155,16 +74,16 @@ class NotesListState extends State<NotesList> {
               : ListView.builder(
                   physics: const ScrollPhysics(parent: BouncingScrollPhysics()),
                   padding: const EdgeInsets.all(0),
-                  itemCount: dummyList.length,
-                  controller: scrollController,
+                  itemCount: widget.dummyList.length,
+                  controller: widget.scrollController,
                   itemBuilder: (context, index) {
                     return NotesListItem(
-                      title: dummyList[index][0],
-                      content: dummyList[index][1],
-                      dateString: dummyList[index][2],
+                      title: widget.dummyList[index][0],
+                      content: widget.dummyList[index][1],
+                      dateString: widget.dummyList[index][2],
                       index: index,
                       updateNoteItem: (title, content, time, index) {
-                        updateNote(
+                        widget.updateNote(
                           title,
                           content,
                           time,
@@ -172,7 +91,7 @@ class NotesListState extends State<NotesList> {
                         );
                       },
                       onDelete: () {
-                        deleteNote(index);
+                        widget.deleteNote(index);
                       },
                     );
                   },
@@ -184,13 +103,13 @@ class NotesListState extends State<NotesList> {
 }
 
 class NotesListItem extends StatefulWidget {
-  String title = "New Note";
-  String content = "Content";
-  String dateString = "12 December 2021, 12:00 AM";
-  int index;
-  VoidCallback onDelete;
-  Function(String, String, String, int) updateNoteItem;
-  NotesListItem(
+  final String title;
+  final String content;
+  final String dateString;
+  final int index;
+  final VoidCallback onDelete;
+  final Function(String, String, String, int) updateNoteItem;
+  const NotesListItem(
       {super.key,
       required this.title,
       required this.content,
@@ -208,15 +127,13 @@ class _NotesListItemState extends State<NotesListItem> {
   Widget build(BuildContext context) {
     DateTime dateFormat =
         DateFormat("dd MMMM yyyy, hh:mm a").parse(widget.dateString);
-    int date = int.parse(DateFormat("dd").format(dateFormat));
+    String date = DateFormat("dd").format(dateFormat);
     String month = DateFormat("MMM").format(dateFormat);
-    int year = int.parse(DateFormat("yyyy").format(dateFormat));
+    String year = DateFormat("yyyy").format(dateFormat);
     String time = DateFormat("hh:mm a").format(dateFormat);
     return Container(
       width: MediaQuery.of(context).size.width,
-      //height: 80,
       margin: const EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 10),
-      //padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
@@ -238,7 +155,7 @@ class _NotesListItemState extends State<NotesListItem> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Quill(
+                builder: (context) => QuillViewController(
                     getTitle: widget.title,
                     getContent: widget.content,
                     getIndex: widget.index,
@@ -273,10 +190,6 @@ class _NotesListItemState extends State<NotesListItem> {
             backgroundColor: const Color.fromARGB(0, 208, 29, 29),
             elevation: 0,
             padding: const EdgeInsets.all(0),
-            //disabledForegroundColor: Colors.transparent,
-            //shadowColor: Colors.transparent,
-            //foregroundColor: Colors.transparent,
-            //shape: const LinearBorder(side: BorderSide.none),
           ),
           child: Row(
             children: [
@@ -291,40 +204,36 @@ class _NotesListItemState extends State<NotesListItem> {
                     ),
                   ),
                 ),
-                child: Column(
-                    //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(
-                        date.toString(),
-                        style: TextStyle(
-                            fontSize: 25,
-                            fontFamily: "Noto Serif Display",
-                            height: 0,
-                            color: Resources.primaryTextColor,
-                            letterSpacing: 2),
-                      ),
-                      Text(
-                        month.toUpperCase(),
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontFamily: "Inria Sans",
-                            color: Resources.secondaryTextColor,
-                            letterSpacing: 2),
-                      ),
-                      Text(
-                        year.toString(),
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: "Inria Sans",
-                            color: Resources
-                                .tertiaryTextColor, //Color.fromARGB(255, 156, 156, 156),
-                            letterSpacing: 2),
-                      )
-                    ]),
+                child: Column(children: [
+                  Text(
+                    date,
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontFamily: "Noto Serif Display",
+                        height: 0,
+                        color: Resources.primaryTextColor,
+                        letterSpacing: 2),
+                  ),
+                  Text(
+                    month.toUpperCase(),
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontFamily: "Inria Sans",
+                        color: Resources.secondaryTextColor,
+                        letterSpacing: 2),
+                  ),
+                  Text(
+                    year,
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: "Inria Sans",
+                        color: Resources.tertiaryTextColor,
+                        letterSpacing: 2),
+                  )
+                ]),
               ),
               Expanded(
                 child: Container(
-                  //decoration: BoxDecoration(color: Colors.black),
                   padding: const EdgeInsets.all(10),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -345,8 +254,7 @@ class _NotesListItemState extends State<NotesListItem> {
                             ? "${widget.content.substring(0, 25)}..."
                             : widget.content,
                         style: TextStyle(
-                            color: Resources
-                                .secondaryTextColor, //Color.fromARGB(255, 165, 165, 165),
+                            color: Resources.secondaryTextColor,
                             fontSize: 12,
                             fontFamily: "Inria Sans"),
                       ),
@@ -364,8 +272,7 @@ class _NotesListItemState extends State<NotesListItem> {
                             Text(
                               time,
                               style: TextStyle(
-                                  color: Resources
-                                      .tertiaryTextColor, //Color.fromARGB(255, 165, 165, 165),
+                                  color: Resources.tertiaryTextColor,
                                   fontSize: 10,
                                   fontFamily: "Inria Sans"),
                             ),

@@ -8,11 +8,11 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 class Resources {
-  static String Default_BackgroundImage = "images/default.jpg";
-  static String BackgroundImage = "images/default.jpg";
-  static String KEY_NOTESLIST = "notesList";
-  static String KEY_TODOLIST = "todoList";
-  static String KEY_REMINDERLIST = "remList";
+  static String defaultBackgroundImage = "images/default.jpg";
+  static String backgroundImage = "images/default.jpg";
+  static String keyNotesList = "notesList";
+  static String keyTodoList = "todoList";
+  static String keyReminderList = "remList";
 
   static Color primaryLineColor = Colors.white; // Colors.white;
   static Color secondaryLineColor = const Color.fromARGB(
@@ -23,13 +23,13 @@ class Resources {
   static Color tertiaryTextColor = const Color.fromARGB(112, 255, 255, 255);
   static Color invertPrimaryTextColor =
       const Color.fromARGB(255, 0, 0, 0); // Colors.white;
-  static Color invertSecondaryTextColor =
-      Color.fromARGB(157, 0, 0, 0); // const Color.fromARGB(157, 255, 255, 255);
-  static Color invertTertiaryTextColor = Color.fromARGB(111, 0, 0, 0);
+  static Color invertSecondaryTextColor = const Color.fromARGB(
+      157, 0, 0, 0); // const Color.fromARGB(157, 255, 255, 255);
+  static Color invertTertiaryTextColor = const Color.fromARGB(111, 0, 0, 0);
 
   static Color primaryBackgroundColor =
-      Color.fromARGB(255, 47, 47, 47); // Colors.white;
-  static Color secondaryBackgroundColor = Color.fromARGB(
+      const Color.fromARGB(255, 47, 47, 47); // Colors.white;
+  static Color secondaryBackgroundColor = const Color.fromARGB(
       157, 59, 59, 59); // const Color.fromARGB(157, 255, 255, 255);
 
   ImageProvider getImageProvider(String path) {
@@ -40,18 +40,16 @@ class Resources {
     }
   }
 
-  static bool isMobile(BuildContext context) {
-    return Platform.isAndroid ||
-        Platform.isIOS ||
-        MediaQuery.of(context).size.width < 600;
+  static bool isMobile(double width) {
+    return Platform.isAndroid || Platform.isIOS || width < 600;
   }
 
-  static void ClearPreferences() {
+  static void clearPreferences() {
     SharedPreferences.getInstance().then((prefs) {
       prefs.clear();
     });
 
-    BackgroundImage = Default_BackgroundImage;
+    backgroundImage = defaultBackgroundImage;
   }
 
   static void fetchData(String x) async {
@@ -67,12 +65,3 @@ class Resources {
     }
   }
 }
-
-
-
-// class CustomIcons {
-//   static const IconData myIcon = IconData(0xe800, fontFamily: 'CustomIcons');
-// }
-
-// // Then, to use it:
-// Icon(CustomIcons.myIcon)

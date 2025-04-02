@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:omni_notes/quill.dart';
+// import 'package:omni_notes/quill.dart';
 
 void main() {
-  runApp(const notes());
+  runApp(const Notes());
 }
 
-class notes extends StatefulWidget {
-  const notes({super.key});
+class Notes extends StatefulWidget {
+  const Notes({super.key});
 
   @override
-  State<notes> createState() => notes_state();
+  State<Notes> createState() => NotesStates();
 }
 
-class notes_state extends State<notes> {
+class NotesStates extends State<Notes> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

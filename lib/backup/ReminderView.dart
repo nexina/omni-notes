@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:omni_notes/main.dart';
+import 'package:omni_notes/view/main.dart';
 
 class ReminderView extends StatelessWidget {
   const ReminderView({super.key});
@@ -15,7 +15,7 @@ class ReminderView extends StatelessWidget {
           onPressed: () {
             // Navigate back to the first screen by popping the current route
             // off the stack.
-            app.navigatorKey.currentState?.pop();
+            // App.navigatorKey.currentState?.pop();
           },
           child: const Text('Go back!'),
         ),

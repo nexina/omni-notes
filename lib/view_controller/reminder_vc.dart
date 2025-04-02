@@ -1,21 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:omni_notes/notification_service.dart';
 import 'package:omni_notes/resources.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ReminderList extends StatefulWidget {
-  const ReminderList({super.key});
+class ReminderListViewController extends StatefulWidget {
+  const ReminderListViewController({super.key});
 
   @override
-  State<ReminderList> createState() => ReminderListState();
+  State<ReminderListViewController> createState() =>
+      ReminderListViewControllerState();
 }
 
-class ReminderListState extends State<ReminderList> {
+class ReminderListViewControllerState
+    extends State<ReminderListViewController> {
   @override
   void initState() {
     super.initState();
@@ -52,7 +52,7 @@ class ReminderListState extends State<ReminderList> {
 
   Future<void> loadReminder() async {
     final prefs = await SharedPreferences.getInstance();
-    final loadedList = prefs.getString(Resources.KEY_REMINDERLIST);
+    final loadedList = prefs.getString(Resources.keyReminderList);
     if (loadedList != null) {
       remList = List<List<String>>.from(
           jsonDecode(loadedList).map((x) => List<String>.from(x)));
@@ -61,7 +61,7 @@ class ReminderListState extends State<ReminderList> {
 
   Future<void> saveToDoList() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(Resources.KEY_REMINDERLIST, jsonEncode(remList));
+    prefs.setString(Resources.keyReminderList, jsonEncode(remList));
   }
 
   Future<void> resetPreferences() async {
@@ -72,7 +72,7 @@ class ReminderListState extends State<ReminderList> {
   void removeReminder(int index) {
     setState(() {
       remList.removeAt(index);
-      cancelNotification(index);
+      // cancelNotification(index);
       saveToDoList();
     });
   }
@@ -151,13 +151,13 @@ class ReminderListState extends State<ReminderList> {
     if (title == "") {
       title = "New Reminder";
     }
-    await NotificationService.showNotification(
-      id: id,
-      title: title,
-      scheduled: true,
-      scheduledTime: scheduledTime,
-      category: NotificationCategory.Reminder,
-    );
+    // await NotificationService.showNotification(
+    //   id: id,
+    //   title: title,
+    //   scheduled: true,
+    //   scheduledTime: scheduledTime,
+    //   category: NotificationCategory.Reminder,
+    // );
 
     startTimer(id, scheduledTime);
 
@@ -165,17 +165,17 @@ class ReminderListState extends State<ReminderList> {
   }
 
   void updateNotification(int id, String title, String time) async {
-    await NotificationService.updateScheduledNotification(
-        id: id, newTitle: title, newTime: time);
+    //   await NotificationService.updateScheduledNotification(
+    //       id: id, newTitle: title, newTime: time);
 
-    DateTime scheduledTime = DateFormat("dd MMM yyyy, hh:mm a").parse(time);
-    cancelTimer(id);
-    startTimer(id, scheduledTime);
-  }
+    //   DateTime scheduledTime = DateFormat("dd MMM yyyy, hh:mm a").parse(time);
+    //   cancelTimer(id);
+    //   startTimer(id, scheduledTime);
+    // }
 
-  void cancelNotification(int id) async {
-    await NotificationService.cancelNotification(id: id);
-    cancelTimer(id);
+    // void cancelNotification(int id) async {
+    //   await NotificationService.cancelNotification(id: id);
+    //   cancelTimer(id);
   }
 
   void changeStatus(int index) {
@@ -199,7 +199,6 @@ class ReminderListState extends State<ReminderList> {
     return Column(
       children: [
         TextField(
-          // SEARCH Text Field
           controller: searchController,
           onChanged: (value) {
             setState(() {
@@ -211,7 +210,7 @@ class ReminderListState extends State<ReminderList> {
           decoration: InputDecoration(
             hintText: "SEARCH",
             hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.6), letterSpacing: 5),
+                color: Colors.white.withValues(alpha: 0.6), letterSpacing: 5),
             border: InputBorder.none,
             disabledBorder: InputBorder.none,
           ),
